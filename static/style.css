@@ -1,0 +1,6 @@
+/* Estilo customizado para o link ativo da navegação */
+.nav-link.active {
+    background-color: #2563eb; /* Cor azul-600 do Tailwind */
+    color: white;
+    font-weight: 600;
+}

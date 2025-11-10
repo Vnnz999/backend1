@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Usuário</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #3b8d99, #6b6b83, #aa4b6b);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .form-container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            width: 350px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        input[type="submit"] {
+            background-color: #3b8d99;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #327a84;
+        }
+
+        .debug {
+            margin-top: 20px;
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+            font-size: 0.9em;
+        }
+
+        a {
+            color: #3b8d99;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}" role="alert">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+
+        <h2>Cadastro de Usuário</h2>
+        <form action="/registrar" method="POST">
+            <label for="usuarioForm">Nome:</label>
+            <input type="text" name="usuarioForm" id="usuarioForm" placeholder="Digite seu nome" required>
+
+            <label for="emailForm">Email:</label>
+            <input type="text" name="emailForm" id="emailForm" placeholder="Digite seu email" required>
+
+            <label for="senhaForm">Senha:</label>
+            <input type="password" name="senhaForm" id="senhaForm" placeholder="Digite sua senha" required>
+
+            <label for="senhaMestreForm">Senha Mestre:</label>
+            <input type="password" id="senhaMestreForm" name="senhaMestreForm" required>
+            
+            <input type="submit" value="Cadastrar">
+        </form>
+
+        <p>Já tem conta? <a href="/login">Fazer login</a></p>
+        </div>
+
+    </div>
+</body>
+</html>
