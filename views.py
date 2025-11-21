@@ -1,4 +1,4 @@
-from main import app
+#from main import app
 #importanto o aplicativo e o flask
 from flask import render_template
 

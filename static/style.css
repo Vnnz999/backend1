@@ -1,6 +1,105 @@
-/* Estilo customizado para o link ativo da navegação */
+/* Estilo para o fundo escurecido do modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    /* Transição suave */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Classe 'open' que será adicionada pelo JS */
+.modal-overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Estilo para o conteúdo do modal */
+.modal-content {
+    /* Transição de 'zoom' ao aparecer */
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.open .modal-content {
+    transform: scale(1);
+}
+
+/* Animação do Spinner de Loading */
+.loading-spinner {
+    border: 4px solid #f3f3f3; /* Cinza claro */
+    border-top: 4px solid #3b82f6; /* Azul */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+.loading-spinner.small {
+    width: 20px;
+    height: 20px;
+    border-width: 2px;
+    margin: 0;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Adiciona um estilo 'ativo' para o link da barra lateral */
 .nav-link.active {
-    background-color: #2563eb; /* Cor azul-600 do Tailwind */
-    color: white;
+    background-color: #334155; /* bg-slate-700 */
     font-weight: 600;
+}
+
+/* Estilos de Toasts / Notificações */
+.toast {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    opacity: 0;
+    transform: translateX(100%);
+    animation: slideIn 0.3s ease forwards, fadeOut 0.5s ease 2.5s forwards;
+}
+
+.toast.success {
+    background-color: #22c55e; /* green-500 */
+}
+
+.toast.error {
+    background-color: #ef4444; /* red-500 */
+}
+
+/* Animação de entrada e saída do toast */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
 }

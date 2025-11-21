@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Estoque - Funcionário</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg-slate-100 font-sans h-screen flex flex-col md:flex-row overflow-hidden">
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div id="flash-messages" class="fixed top-4 left-1/2 transform -translate-x-1/2 w-11/12 md:w-1/2 z-[60]">
+        {% for category, message in messages %}
+            <div class="p-3 rounded mb-2 shadow-md text-center font-bold text-sm md:text-base
+                        {% if category == 'success' %}bg-green-200 text-green-800{% elif category == 'error' %}bg-red-200 text-red-800{% elif category == 'warning' %}bg-yellow-200 text-yellow-800{% else %}bg-gray-200 text-gray-800{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
+
+    <header class="md:hidden bg-slate-900 text-white p-4 flex items-center shadow-md z-30">
+        <button id="mobileMenuBtn" class="text-white focus:outline-none mr-4">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        </button>
+        <h1 class="text-lg font-bold">Impacto Multimarcas</h1>
+    </header>
+
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden glass"></div>
+
+    <nav id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-200 flex flex-col p-4 shadow-lg transform -translate-x-full transition-transform duration-300 md:relative md:translate-x-0 md:flex">
+        
+        <div class="flex justify-end md:hidden mb-4">
+            <button id="closeSidebarBtn" class="text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <h1 class="text-2xl font-bold mb-8 text-white text-center hidden md:block">Impacto Multimarcas</h1>
+        <p class="text-xs text-center text-gray-500 -mt-6 mb-6 uppercase tracking-widest hidden md:block">Painel do Funcionário</p>
+        
+        <ul class="flex flex-col space-y-2">
+            <li>
+                <a href="#" class="nav-link active flex items-center p-3 rounded-lg hover:bg-slate-700 transition-colors" data-page="page-2">
+                    <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                    Produtos
+                </a>
+            </li>
+            <li>
+                <a href="#" class="nav-link flex items-center p-3 rounded-lg hover:bg-slate-700 transition-colors" data-page="page-3">
+                    <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m0 10l8 4m0-10v10"></path></svg>
+                    Estoque
+                </a>
+            </li>
+        </ul>
+        
+        <ul class="mt-auto">
+             <li>
+                <form action="{{ url_for('logout') }}" method="POST" class="w-full">
+                    <button type="submit" class="w-full flex items-center p-3 rounded-lg hover:bg-red-900 text-red-200 transition-colors text-left font-bold">
+                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        Sair
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto w-full bg-slate-100 relative">
+
+        <div id="page-2" class="page-content pb-20 w-full max-w-full">
+            <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4 md:mb-6">Produtos</h2>
+            
+            <div class="mb-4 md:mb-6 w-full">
+                <input type="text" id="productSearchInput" placeholder="Procurar produto..." class="w-full p-3 border border-slate-300 rounded-lg shadow-sm text-base">
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md border border-gray-200 w-full">
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-100 border-b border-slate-200">
+                            <tr>
+                                <th class="px-3 py-3 font-semibold text-slate-600 text-sm whitespace-nowrap">Nome</th>
+                                <th class="px-3 py-3 font-semibold text-slate-600 text-sm whitespace-nowrap">Sexo</th>
+                                <th class="px-3 py-3 font-semibold text-slate-600 text-sm whitespace-nowrap">Tam.</th>
+                                <th class="px-3 py-3 font-semibold text-slate-600 text-sm whitespace-nowrap">Objeto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTableBody" class="divide-y divide-slate-200">
+                            {% if produtos %}
+                                {% for p in produtos %}
+                                <tr class="hover:bg-slate-50">
+                                    <td class="px-3 py-3 text-slate-700 whitespace-nowrap text-sm">{{ p.nome }}</td>
+                                    <td class="px-3 py-3 text-slate-700 whitespace-nowrap text-sm">{{ p.categoria }}</td>
+                                    <td class="px-3 py-3 text-slate-700 whitespace-nowrap text-sm">{{ p.tamanho }}</td>
+                                    <td class="px-3 py-3 text-slate-700 whitespace-nowrap text-sm">{{ p.objeto }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr><td colspan="4" class="p-4 text-center text-slate-500">Nenhum produto cadastrado.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-3" class="page-content hidden pb-20 w-full max-w-full">
+            <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4 md:mb-6">Movimentação</h2>
+            
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-3">
+                <input type="text" id="stockSearchInput" placeholder="Procurar..." class="w-full md:w-1/3 p-3 border border-slate-300 rounded-lg shadow-sm text-base">
+                
+                <div class="flex gap-2 w-full md:w-auto">
+                    <button id="openEntryModalBtn" class="bg-green-600 text-white px-4 py-3 rounded-lg shadow-md hover:bg-green-700 transition-colors flex-1 text-center justify-center flex items-center text-sm font-bold">
+                        <span class="mr-1">+</span> Entrada
+                    </button>
+                    <button id="openExitModalBtn" class="bg-red-600 text-white px-4 py-3 rounded-lg shadow-md hover:bg-red-700 transition-colors flex-1 text-center justify-center flex items-center text-sm font-bold">
+                        <span class="mr-1">-</span> Saída
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md border border-gray-200 w-full">
+                <div class="overflow-x-auto w-full">
+                    <table id="estoqueTabela" class="w-full text-left">
+                        <thead class="bg-slate-100 border-b border-slate-200">
+                            <tr>
+                                <th class="px-3 py-3 font-semibold text-slate-600 text-sm whitespace-nowrap">Nome</th>
+                                <th class="px-3 py-3 font-semibold text-slate-600 text-sm whitespace-nowrap">Qtd.</th>
+                                <th class="px-3 py-3 font-semibold text-slate-600 text-sm whitespace-nowrap">Tam.</th>
+                                <th class="px-3 py-3 font-semibold text-slate-600 text-sm whitespace-nowrap">Sexo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockTableBody" class="divide-y divide-slate-200">
+                            {% if produtos %}
+                                {% for item in produtos %}
+                                <tr class="hover:bg-slate-50">
+                                    <td class="px-3 py-3 text-slate-700 whitespace-nowrap text-sm">{{ item.nome }}</td>
+                                    <td class="px-3 py-3 font-bold whitespace-nowrap text-sm {{ 'text-red-600' if item.calcular_estoque() <= 5 else 'font-medium' }}">
+                                        {{ item.calcular_estoque() | int }}
+                                    </td>
+                                    <td class="px-3 py-3 text-slate-700 whitespace-nowrap text-sm">{{ item.tamanho }}</td>
+                                    <td class="px-3 py-3 text-slate-700 whitespace-nowrap text-sm">{{ item.categoria }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr><td colspan="4" class="p-4 text-center text-slate-500">Estoque vazio.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="stockMovementModal" class="modal-overlay hidden fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-[60] backdrop-blur-sm p-4">
+        <div class="modal-content bg-white p-6 md:p-8 rounded-lg shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <h2 id="movementModalTitle" class="text-xl md:text-2xl font-bold text-slate-800 mb-6">Registrar Movimentação</h2>
+            
+            <form id="stockMovementForm" action="{{ url_for('movimentacao') }}" method="POST">
+                <input type="hidden" name="tipo" id="movementTypeInput" value="entrada">
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="movementProductSelect" class="block text-sm font-medium text-slate-700">Produto</label>
+                        <select id="movementProductSelect" name="produto_id" class="mt-1 block w-full p-3 border border-slate-300 rounded-lg shadow-sm bg-white text-base" required>
+                            <option value="">Selecione...</option>
+                            {% if produtos %}
+                                {% for p in produtos %}
+                                    <option value="{{ p.id }}">{{ p.nome }} ({{ p.tamanho }}) - {{ p.objeto }}</option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="movementQuantityInput" class="block text-sm font-medium text-slate-700">Quantidade</label>
+                        <input type="number" id="movementQuantityInput" name="quantidade" step="1" min="1" class="mt-1 block w-full p-3 border border-slate-300 rounded-lg shadow-sm text-base" inputmode="numeric" required>
+                    </div>
+                    <div>
+                        <label for="movementDate" class="block text-sm font-medium text-slate-700">Data e Hora</label>
+                        <input type="datetime-local" id="movementDate" name="data" class="mt-1 block w-full p-3 border border-slate-300 rounded-lg shadow-sm text-base" required>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-8">
+                    <button type="button" id="cancelMovementModalBtn" class="w-full sm:w-auto bg-slate-200 text-slate-800 px-5 py-3 rounded-lg shadow-md hover:bg-slate-300 transition-colors text-center">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="w-full sm:w-auto bg-blue-600 text-white px-5 py-3 rounded-lg shadow-md hover:bg-blue-700 transition-colors font-bold text-center">
+                        Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed top-5 right-5 z-[70] space-y-3 w-full max-w-xs px-4 md:px-0"></div>
+    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            
+            /* LÓGICA DO MENU MOBILE */
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            function toggleSidebar() {
+                const isClosed = sidebar.classList.contains('-translate-x-full');
+                if (isClosed) {
+                    sidebar.classList.remove('-translate-x-full');
+                    overlay.classList.remove('hidden');
+                } else {
+                    sidebar.classList.add('-translate-x-full');
+                    overlay.classList.add('hidden');
+                }
+            }
+
+            if(mobileMenuBtn) mobileMenuBtn.addEventListener('click', toggleSidebar);
+            if(closeSidebarBtn) closeSidebarBtn.addEventListener('click', toggleSidebar);
+            if(overlay) overlay.addEventListener('click', toggleSidebar);
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth < 768) { 
+                        sidebar.classList.add('-translate-x-full');
+                        overlay.classList.add('hidden');
+                    }
+                });
+            });
+
+            /* VALIDAÇÃO E LÓGICA EXISTENTE */
+            const formMov = document.getElementById('stockMovementForm');
+            if (formMov) {
+                const newForm = formMov.cloneNode(true);
+                formMov.parentNode.replaceChild(newForm, formMov);
+                
+                const btnCancel = newForm.querySelector('#cancelMovementModalBtn');
+                if(btnCancel) {
+                    btnCancel.addEventListener('click', function() {
+                        document.getElementById('stockMovementModal').classList.add('hidden');
+                    });
+                }
+                
+                newForm.addEventListener('submit', function(e) {
+                    const currentInputQtd = newForm.querySelector('#movementQuantityInput');
+                    const qtd = parseFloat(currentInputQtd.value);
+                    
+                    if (qtd > 100) {
+                        const confirmacao = confirm("⚠️ ALERTA DE QUANTIDADE ALTA!\n\nTem certeza?");
+                        if (!confirmacao) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            currentInputQtd.focus();
+                            return false;
+                        }
+                    }
+                });
+            }
+
+            /* LOGICA DOS MODAIS */
+            const modal = document.getElementById('stockMovementModal');
+            const title = document.getElementById('movementModalTitle');
+            const typeInput = document.getElementById('movementTypeInput');
+            const openEntryBtn = document.getElementById('openEntryModalBtn');
+            const openExitBtn = document.getElementById('openExitModalBtn');
+            
+            function openModal(type) {
+                const saveBtn = modal.querySelector('button[type="submit"]');
+                if (type === 'entrada') {
+                    title.textContent = 'Registrar Entrada (Compra)';
+                    typeInput.value = 'entrada';
+                    saveBtn.textContent = 'Salvar Entrada';
+                    saveBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                    saveBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                } else if (type === 'saida') {
+                    title.textContent = 'Registrar Saída (Venda)';
+                    typeInput.value = 'saida';
+                    saveBtn.textContent = 'Salvar Saída';
+                    saveBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                    saveBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                }
+                modal.classList.remove('hidden');
+            }
+
+            if (openEntryBtn) openEntryBtn.addEventListener('click', () => openModal('entrada'));
+            if (openExitBtn) openExitBtn.addEventListener('click', () => openModal('saida'));
+
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
